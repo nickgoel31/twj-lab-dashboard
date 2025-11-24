@@ -1,7 +1,7 @@
 import React from 'react';
-import { OurWorkType } from './types';
-import { ArrowUpRight, Globe, MapPin, Calendar, Quote } from 'lucide-react';
+import { ArrowUpRight, Globe, MapPin, Quote } from 'lucide-react';
 import { PortfolioItemWithTestimonialsAndStats } from '@/actions/portfolio';
+import Image from 'next/image';
 
 interface PortfolioPreviewProps {
   workData: PortfolioItemWithTestimonialsAndStats[];
@@ -38,13 +38,13 @@ const PortfolioPreview = ({ workData }: PortfolioPreviewProps) => {
         {/* HERO */}
         <div className="relative h-64 w-full bg-slate-900 group">
              {project.heroImage ? (
-                 <img src={project.heroImage} alt="hero" className="w-full h-full object-cover opacity-80" />
+                 <Image src={project.heroImage} alt="hero" width={1000} height={400} className="w-full h-full object-cover opacity-80" />
              ) : (
-                 <div className="w-full h-full bg-gradient-to-br from-indigo-900 to-slate-900" />
+                 <div className="w-full h-full bg-linear-to-br from-indigo-900 to-slate-900" />
              )}
-             <div className="absolute bottom-0 left-0 w-full p-6 bg-gradient-to-t from-black/80 to-transparent">
+             <div className="absolute bottom-0 left-0 w-full p-6 bg-linear-to-t from-black/80 to-transparent">
                  <div className="flex items-center gap-3 mb-2">
-                    {project.companyLogo && <img src={project.companyLogo} className="w-8 h-8 rounded bg-white p-1" />}
+                    {project.companyLogo && <Image src={project.companyLogo} alt="Company Logo" width={32} height={32} className="w-8 h-8 rounded bg-white p-1" />}
                     <h1 className="text-white font-bold text-2xl">{project.companyName}</h1>
                  </div>
                  <p className="text-slate-200 text-sm font-light max-w-md">{project.heroLine}</p>
@@ -90,18 +90,18 @@ const PortfolioPreview = ({ workData }: PortfolioPreviewProps) => {
             </div>
 
             {/* RESULTS STATS */}
-            {project.data && (
+            {project.stats && (
                 <div className="bg-slate-900 rounded-xl p-6 text-white grid grid-cols-3 divide-x divide-slate-700">
                     <div className="px-2 text-center">
-                        <div className="text-2xl font-bold text-indigo-400">{project.data.conversionRateIncrease}</div>
+                        <div className="text-2xl font-bold text-indigo-400">{project.stats?.conversionRateIncrease}</div>
                         <div className="text-[10px] uppercase tracking-wide text-slate-400 mt-1">Conv. Rate</div>
                     </div>
                     <div className="px-2 text-center">
-                        <div className="text-2xl font-bold text-indigo-400">{project.data.trafficGrowth}</div>
+                        <div className="text-2xl font-bold text-indigo-400">{project.stats?.trafficGrowth}</div>
                         <div className="text-[10px] uppercase tracking-wide text-slate-400 mt-1">Traffic</div>
                     </div>
                     <div className="px-2 text-center">
-                        <div className="text-2xl font-bold text-indigo-400">{project.data.userGrowth}</div>
+                        <div className="text-2xl font-bold text-indigo-400">{project.stats?.userGrowth}</div>
                         <div className="text-[10px] uppercase tracking-wide text-slate-400 mt-1">Users</div>
                     </div>
                 </div>
@@ -111,7 +111,7 @@ const PortfolioPreview = ({ workData }: PortfolioPreviewProps) => {
             {project.testimonial && (
                 <div className="relative pl-8 italic text-slate-600 border-l-4 border-indigo-200">
                     <Quote className="absolute -top-2 left-6 text-indigo-100 fill-indigo-50" size={40} />
-                    <p className="mb-4 relative z-10">"{project.testimonial.quote}"</p>
+                    <p className="mb-4 relative z-10">&quot;{project.testimonial.quote}&quot;</p>
                     <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center font-bold text-xs text-slate-500">
                             {project.testimonial.author.charAt(0)}
@@ -130,7 +130,7 @@ const PortfolioPreview = ({ workData }: PortfolioPreviewProps) => {
                     {project.media.map((img, idx) => (
                         <div key={idx} className={`rounded-lg overflow-hidden border border-slate-100 ${idx === 0 ? 'col-span-2 aspect-video' : 'aspect-square'}`}>
                             {/* Placeholder check for demo */}
-                            <img src={img} alt="work" className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
+                            <Image src={img} alt="work" width={1000} height={1000} className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
                         </div>
                     ))}
                 </div>

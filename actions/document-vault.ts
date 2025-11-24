@@ -82,7 +82,7 @@ export async function uploadDocument(formData: FormData) {
     return { success: true, message: 'Document uploaded successfully.' };
 
   } catch (error) {
-    console.error('Upload failed:', error.message);
+    console.error('Upload failed:', (error as Error).message);
     return { success: false, message: 'Failed to upload document.' };
   }
 }
