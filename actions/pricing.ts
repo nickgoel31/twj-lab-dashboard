@@ -61,10 +61,10 @@ export async function createPricingPlan(categoryId: number) {
       data: {
         name: 'New Plan',
         description: 'Description here',
-        price: '$0',
+        price: 'contact-sales',
         categoryId: categoryId,
-        features: ['New Feature'],
-        featuresNotIncluded: []
+        features: '["New Feature"]',
+        featuresNotIncluded: '[]'
       }
     })
     

@@ -12,27 +12,33 @@ interface PortfolioEditorProps {
   setWorkData: React.Dispatch<React.SetStateAction<PortfolioItemWithTestimonialsAndStats[]>>;
 }
 
+// ✅ HELPER: Safely parse JSON string to Array
+export const safeParse = (data: string | string[] | null | undefined): string[] => {
+  if (!data) return [];
+  if (Array.isArray(data)) return data;
+  try {
+    const parsed = JSON.parse(data);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (e) {
+    return [];
+  }
+};
+
 const PortfolioEditor: React.FC<PortfolioEditorProps> = ({ workData, setWorkData }) => {
    const router = useRouter();
 
-  // Initialize selectedId from incoming workData to avoid synchronous setState in an effect
   const [selectedId, setSelectedId] = useState<number | null>(() => workData?.[0]?.id ?? null);
   const [activeSection, setActiveSection] = useState<string>('identity');
   const [isSaving, setIsSaving] = useState(false);
 
-  // If selectedId is null or no longer exists in workData, fall back to the first project's id.
-  // Use this 'effective' id in render logic so we avoid forcing setState from an effect.
   const effectiveSelectedId: number | null = (() => {
     if (!workData || workData.length === 0) return null;
-    // if currently selected id exists in list, use it
     if (selectedId != null && workData.some(w => w.id === selectedId)) return selectedId;
-    // otherwise fallback to first project's id (but we don't call setSelectedId here)
     return workData[0].id;
   })();
 
   const selectedProject = workData.find(w => w.id === effectiveSelectedId) || workData[0];
 
-  // Safety check for empty data
   if (!workData || workData.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center p-12 border-2 border-dashed border-slate-200 rounded-xl space-y-4">
@@ -59,11 +65,8 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({ workData, setWorkData
     );
   }
 
-
-
   // --- LOCAL HELPERS ---
 
-  // value accepts common shapes used by this editor
   type FieldValue = string | number | boolean | Array<string> | Record<string, unknown> | undefined;
 
   const updateField = (field: keyof PortfolioItemWithTestimonialsAndStats, value: FieldValue) => {
@@ -89,8 +92,10 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({ workData, setWorkData
     );
   };
 
+  // ✅ FIX: Parse string -> modify array -> stringify back
   const handleArray = (field: 'services' | 'media', action: 'add' | 'remove', value?: string, index?: number) => {
-    const currentList: string[] = (selectedProject[field] as unknown as string[]) || [];
+    // 1. Parse string to array
+    const currentList = safeParse(selectedProject[field] as string);
     const newList = [...currentList];
 
     if (action === 'remove' && typeof index === 'number') {
@@ -98,7 +103,9 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({ workData, setWorkData
     } else if (action === 'add') {
       newList.push(value ?? 'New Item');
     }
-    updateField(field, newList);
+    
+    // 2. Stringify back for state (Prisma expects JSON string)
+    updateField(field, JSON.stringify(newList));
   };
 
   // --- SERVER ACTIONS ---
@@ -123,12 +130,9 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({ workData, setWorkData
 
     if (result.success && result.data) {
       toast.success('New project created');
-
-      // Optimistic Update
       const newData = [...workData, result.data];
       setWorkData(newData);
       setSelectedId(result.data.id);
-
       router.refresh();
     } else {
       toast.error('Failed to create project');
@@ -143,17 +147,19 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({ workData, setWorkData
 
     if (result.success) {
       toast.success('Project deleted');
-
-      // Optimistic Update
       const newData = workData.filter((i) => i.id !== selectedId);
       setWorkData(newData);
       setSelectedId(newData.length > 0 ? newData[0].id : null);
-
       router.refresh();
     } else {
       toast.error('Failed to delete project');
     }
   };
+  
+  // ✅ PREPARE DATA FOR RENDER
+  // Parse the JSON strings into arrays so .map works in the JSX
+  const servicesList = safeParse(selectedProject.services as string);
+  const mediaList = safeParse(selectedProject.media as string);
 
   return (
     <div className="space-y-6 pb-20">
@@ -269,15 +275,17 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({ workData, setWorkData
                 <button onClick={() => handleArray('services', 'add', 'New Service')} className="text-indigo-600 text-xs font-bold hover:underline">+ Add</button>
               </div>
               <div className="flex flex-wrap gap-2">
-                {(selectedProject.services || []).map((service: string, idx: number) => (
+                {/* ✅ Use parsed servicesList instead of raw string */}
+                {servicesList.map((service: string, idx: number) => (
                   <div key={idx} className="flex items-center bg-slate-100 px-2 py-1 rounded text-sm">
                     <input
                       className="bg-transparent border-none focus:outline-none w-auto min-w-[50px] text-slate-700"
                       value={service}
                       onChange={(e) => {
-                        const newArr = [...(selectedProject.services || [])];
+                        const newArr = [...servicesList];
                         newArr[idx] = e.target.value;
-                        updateField('services', newArr);
+                        // ✅ Stringify back when updating
+                        updateField('services', JSON.stringify(newArr));
                       }}
                     />
                     <button onClick={() => handleArray('services', 'remove', undefined, idx)} className="ml-1 text-slate-400 hover:text-red-500"><Trash2 size={12} /></button>
@@ -293,14 +301,16 @@ const PortfolioEditor: React.FC<PortfolioEditorProps> = ({ workData, setWorkData
                 <button onClick={() => handleArray('media', 'add', '/placeholder.jpg')} className="text-indigo-600 text-xs font-bold hover:underline">+ Add Image URL</button>
               </div>
               <div className="space-y-2">
-                {(selectedProject.media || []).map((url: string, idx: number) => (
+                {/* ✅ Use parsed mediaList instead of raw string */}
+                {mediaList.map((url: string, idx: number) => (
                   <div key={idx} className="flex gap-2">
                     <input
                       value={url}
                       onChange={(e) => {
-                        const newArr = [...(selectedProject.media || [])];
+                        const newArr = [...mediaList];
                         newArr[idx] = e.target.value;
-                        updateField('media', newArr);
+                        // ✅ Stringify back when updating
+                        updateField('media', JSON.stringify(newArr));
                       }}
                       className="w-full bg-slate-50 border border-slate-200 rounded p-1 text-sm"
                     />

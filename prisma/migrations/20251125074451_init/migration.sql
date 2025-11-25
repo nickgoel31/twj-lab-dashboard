@@ -8,7 +8,7 @@ CREATE TABLE "CurrentClient" (
     "dealValue" REAL,
     "currency" TEXT,
     "country" TEXT,
-    "services" JSONB NOT NULL,
+    "services" TEXT,
     "status" TEXT NOT NULL DEFAULT 'ACTIVE',
     "startDate" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "paymentTerms" TEXT NOT NULL DEFAULT 'FIFTY_FIFTY',
@@ -28,9 +28,9 @@ CREATE TABLE "Project" (
     "startDate" DATETIME,
     "dueDate" DATETIME,
     "budget" REAL,
-    "techStack" JSONB NOT NULL,
+    "techStack" TEXT,
     "devNotes" TEXT,
-    "aiRecommendations" JSONB,
+    "aiRecommendations" TEXT,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" DATETIME NOT NULL,
     CONSTRAINT "Project_clientId_fkey" FOREIGN KEY ("clientId") REFERENCES "CurrentClient" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
@@ -46,7 +46,7 @@ CREATE TABLE "Task" (
     "assignee" TEXT,
     "dueDate" DATETIME,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL,
     CONSTRAINT "Task_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "Project" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
@@ -117,14 +117,14 @@ CREATE TABLE "Lead" (
     "company" TEXT NOT NULL,
     "industry" TEXT NOT NULL,
     "country" TEXT NOT NULL,
-    "dealValue" INTEGER NOT NULL,
+    "dealValue" REAL NOT NULL,
     "currency" TEXT NOT NULL,
     "leadStage" TEXT NOT NULL,
     "lastContacted" DATETIME NOT NULL,
     "leadScore" INTEGER NOT NULL,
     "projectSummary" TEXT NOT NULL,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    "updatedAt" DATETIME NOT NULL
 );
 
 -- CreateTable
@@ -152,14 +152,14 @@ CREATE TABLE "InteractionLogLead" (
 CREATE TABLE "Invoice" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "clientId" TEXT NOT NULL,
-    "amount" REAL NOT NULL,
+    "amount" TEXT NOT NULL,
     "currency" TEXT NOT NULL,
     "status" TEXT NOT NULL DEFAULT 'PENDING',
     "issueDate" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "dueDate" DATETIME NOT NULL,
     "description" TEXT,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL,
     CONSTRAINT "Invoice_clientId_fkey" FOREIGN KEY ("clientId") REFERENCES "CurrentClient" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
@@ -168,13 +168,13 @@ CREATE TABLE "Expense" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "clientId" TEXT,
     "title" TEXT NOT NULL,
-    "amount" REAL NOT NULL,
+    "amount" TEXT NOT NULL,
     "currency" TEXT NOT NULL,
     "category" TEXT,
     "date" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "notes" TEXT,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL,
     CONSTRAINT "Expense_clientId_fkey" FOREIGN KEY ("clientId") REFERENCES "CurrentClient" ("id") ON DELETE SET NULL ON UPDATE CASCADE
 );
 
@@ -185,10 +185,10 @@ CREATE TABLE "KnowledgeHub" (
     "description" TEXT NOT NULL,
     "type" TEXT NOT NULL,
     "content" TEXT NOT NULL,
-    "tags" JSONB NOT NULL,
+    "tags" TEXT,
     "url" TEXT,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    "updatedAt" DATETIME NOT NULL
 );
 
 -- CreateTable
@@ -197,9 +197,9 @@ CREATE TABLE "TemplateLibrary" (
     "name" TEXT NOT NULL,
     "type" TEXT NOT NULL,
     "content" TEXT NOT NULL,
-    "variables" JSONB NOT NULL,
+    "variables" TEXT,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    "updatedAt" DATETIME NOT NULL
 );
 
 -- CreateTable
@@ -219,8 +219,8 @@ CREATE TABLE "PricingPlan" (
     "featured" BOOLEAN NOT NULL DEFAULT false,
     "everythingIncludedPrev" BOOLEAN NOT NULL DEFAULT false,
     "categoryId" INTEGER NOT NULL,
-    "features" JSONB NOT NULL,
-    "featuresNotIncluded" JSONB NOT NULL,
+    "features" TEXT NOT NULL,
+    "featuresNotIncluded" TEXT,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT "PricingPlan_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "PricingCategory" ("id") ON DELETE CASCADE ON UPDATE CASCADE
@@ -230,7 +230,7 @@ CREATE TABLE "PricingPlan" (
 CREATE TABLE "PortfolioItem" (
     "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL,
     "companyName" TEXT NOT NULL,
     "companyLogo" TEXT NOT NULL,
     "industry" TEXT NOT NULL,
@@ -243,8 +243,8 @@ CREATE TABLE "PortfolioItem" (
     "problemStatement" TEXT NOT NULL,
     "solution" TEXT NOT NULL,
     "results" TEXT NOT NULL,
-    "services" JSONB NOT NULL,
-    "media" JSONB NOT NULL
+    "services" TEXT,
+    "media" TEXT
 );
 
 -- CreateTable

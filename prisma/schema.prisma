@@ -1,4 +1,8 @@
-// prisma/schema.prisma
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
   provider = "prisma-client-js"
@@ -10,118 +14,118 @@ datasource db {
 }
 
 model CurrentClient {
-  id              String                 @id @default(cuid())
-  name            String
-  companyName     String?
-  email           String                 @unique
-  phone           String?
-  dealValue       Float?
-  currency        String?                // e.g. USD, EUR, INR
-  country         String?
-  services        Json                   // e.g. ["Web Development", "Branding"]
-  status          ClientStatus           @default(ACTIVE)
-  startDate       DateTime               @default(now())
-  paymentTerms    PaymentTerms           @default(FIFTY_FIFTY)
-  notes           String?
+  id                String                 @id @default(cuid())
+  name              String
+  companyName       String?
+  email             String                 @unique
+  phone             String?
+  dealValue         Float? // Using Float for numeric value
+  currency          String?                // e.g. USD, EUR, INR
+  country           String?
+  services          String?                // MODIFIED: SQLite does not support native String[], store as JSON string
+  status            ClientStatus           @default(ACTIVE)
+  startDate         DateTime               @default(now())
+  paymentTerms      PaymentTerms           @default(FIFTY_FIFTY)
+  notes             String?
 
   // 🔗 Relations
-  projects        Project[]
-  invoices        Invoice[]
-  expenses        Expense[]
-  interactionLogs InteractionLog[]
-  followUps       FollowUpSuggestion[]
-  documents       DocumentVault[]
+  projects          Project[]
+  invoices          Invoice[]
+  expenses          Expense[]
+  interactionLogs   InteractionLog[]
+  followUps         FollowUpSuggestion[]
+  documents         DocumentVault[]
 
-  createdAt       DateTime               @default(now())
-  updatedAt       DateTime               @updatedAt
+  createdAt         DateTime               @default(now())
+  updatedAt         DateTime               @updatedAt
 }
 
 model Project {
-  id               String         @id @default(cuid())
-  clientId         String
-  client           CurrentClient  @relation(fields: [clientId], references: [id])
+  id                String          @id @default(cuid())
+  clientId          String
+  client            CurrentClient   @relation(fields: [clientId], references: [id])
 
-  name             String
-  description      String?        // brief overview
-  status           ProjectStatus  @default(PLANNING)
-  priority         ProjectPriority @default(MEDIUM)
-  startDate        DateTime?      // planned or actual
-  dueDate          DateTime?      // expected completion
-  budget           Float?         // optional budget estimate
-  techStack        Json           // e.g. ["Next.js", "Tailwind", "Node.js"]
-  devNotes         String?        // internal notes for development
-  tasks            Task[]         // detailed breakdown
-  milestones       Milestone[]    // key checkpoints
-  attachments      ProjectFile[]  // designs, mockups, docs
-  aiRecommendations Json?         // (optional) AI-generated suggestions, can split out later
+  name              String
+  description       String?         // brief overview
+  status            ProjectStatus   @default(PLANNING)
+  priority          ProjectPriority @default(MEDIUM)
+  startDate         DateTime?       // planned or actual
+  dueDate           DateTime?       // expected completion
+  budget            Float?          // optional budget estimate
+  techStack         String?         // MODIFIED: SQLite does not support native String[], store as JSON string
+  devNotes          String?         // internal notes for development
+  tasks             Task[]          // detailed breakdown
+  milestones        Milestone[]     // key checkpoints
+  attachments       ProjectFile[]   // designs, mockups, docs
+  aiRecommendations String?         // MODIFIED: SQLite does not support Json, store as String/JSON string
 
-  createdAt        DateTime       @default(now())
-  updatedAt        DateTime       @updatedAt
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
 }
 
 model Task {
-  id          String        @id @default(cuid())
+  id          String      @id @default(cuid())
   projectId   String
-  project     Project       @relation(fields: [projectId], references: [id])
+  project     Project     @relation(fields: [projectId], references: [id])
 
   title       String
   details     String?
-  status      TaskStatus    @default(PENDING)
-  assignee    String?       // contractor name or ID
+  status      TaskStatus  @default(PENDING)
+  assignee    String?     // contractor name or ID
   dueDate     DateTime?
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @default(now()) @updatedAt
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
 }
 
 model Milestone {
-  id          String        @id @default(cuid())
+  id          String    @id @default(cuid())
   projectId   String
-  project     Project       @relation(fields: [projectId], references: [id])
+  project     Project   @relation(fields: [projectId], references: [id])
 
   title       String
   description String?
   targetDate  DateTime?
-  completed   Boolean       @default(false)
-  createdAt   DateTime      @default(now())
+  completed   Boolean   @default(false)
+  createdAt   DateTime  @default(now())
 }
 
 model ProjectFile {
-  id          String        @id @default(cuid())
+  id          String     @id @default(cuid())
   projectId   String
-  project     Project       @relation(fields: [projectId], references: [id])
+  project     Project    @relation(fields: [projectId], references: [id])
 
   name        String
-  url         String        // storage link (S3, GDrive, etc.)
-  type        FileType      // DESIGN, CONTRACT, RESOURCE
+  url         String     // storage link (S3, GDrive, etc.)
+  type        FileType   // DESIGN, CONTRACT, RESOURCE
   uploadedBy  String?
-  createdAt   DateTime      @default(now())
+  createdAt   DateTime   @default(now())
 }
 
 model InteractionLog {
-  id             String        @id @default(cuid())
+  id             String          @id @default(cuid())
   clientId       String
-  client         CurrentClient @relation(fields: [clientId], references: [id])
+  client         CurrentClient   @relation(fields: [clientId], references: [id])
 
   type           InteractionType
   content        String
   nextActionDate DateTime?
-  createdAt      DateTime      @default(now())
+  createdAt      DateTime        @default(now())
 }
 
 model FollowUpSuggestion {
-  id             String        @id @default(cuid())
-  clientId       String
-  client         CurrentClient @relation(fields: [clientId], references: [id])
+  id            String             @id @default(cuid())
+  clientId      String
+  client        CurrentClient      @relation(fields: [clientId], references: [id])
 
-  suggestion     String
-  priority       FollowUpPriority @default(MEDIUM)
-  dueDate        DateTime?
-  isCompleted    Boolean        @default(false)
-  createdAt      DateTime       @default(now())
+  suggestion    String
+  priority      FollowUpPriority   @default(MEDIUM)
+  dueDate       DateTime?
+  isCompleted   Boolean            @default(false)
+  createdAt     DateTime           @default(now())
 }
 
 model DocumentVault {
-  id          String        @id @default(cuid())
+  id          String       @id @default(cuid())
   clientId    String
   client      CurrentClient @relation(fields: [clientId], references: [id])
 
@@ -129,7 +133,7 @@ model DocumentVault {
   url         String
   type        DocumentType
   uploadedBy  String?
-  createdAt   DateTime      @default(now())
+  createdAt   DateTime     @default(now())
 }
 
 /* ===== Enums ===== */
@@ -205,25 +209,25 @@ enum FileType {
 
 
 model Lead {
-  id              Int      @id @default(autoincrement())
-  name            String
-  email           String
-  company         String
-  industry        String
-  country         String
-  dealValue       Int
-  currency        String
-  leadStage       String
-  lastContacted   DateTime
-  leadScore       Int
-  projectSummary  String
+  id                Int      @id @default(autoincrement())
+  name              String
+  email             String
+  company           String // Changed from 'company' to match your dashboard code
+  industry          String
+  country           String
+  dealValue         Float // MODIFIED: Changed from Int to Float to match common database handling, or use String
+  currency          String
+  leadStage         String
+  lastContacted     DateTime
+  leadScore         Int
+  projectSummary    String
 
   // --- RELATIONS ---
-  contactNotes    Note[]
-  interactionLogs InteractionLogLead[] // <-- Each Lead can have multiple interaction logs
+  contactNotes      Note[]
+  interactionLogs   InteractionLogLead[] // <-- Each Lead can have multiple interaction logs
 
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @default(now()) @updatedAt
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 }
 
 model Note {
@@ -235,23 +239,24 @@ model Note {
 }
 
 model InteractionLogLead {
-  id                  String   @id @default(cuid())
-  
+  id                 String @id @default(cuid())
+
   // --- RELATION TO LEAD ---
-  leadId              Int
-  lead                Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  leadId             Int
+  lead               Lead   @relation(fields: [leadId], references: [id], onDelete: Cascade)
 
   // --- INTERACTION DETAILS ---
-  type                InteractionType // <-- Using the new enum
-  content             String          // e.g., "Sent initial outreach email about our services."
-  nextActionDate      DateTime?       // Optional: To schedule the next follow-up
-  followUpSuggestion  String?         // <-- AI-controlled field for future suggestions
+  type               InteractionType // <-- Using the new enum
+  content            String          // e.g., "Sent initial outreach email about our services."
+  nextActionDate     DateTime?       // Optional: To schedule the next follow-up
+  followUpSuggestion String?         // <-- AI-controlled field for future suggestions
 
-  createdAt           DateTime @default(now())
+  createdAt          DateTime @default(now())
 }
 
 
 // --- ENUMS ---
+// NOTE: Turso/SQLite supports enums via a lookup table, so these are fine as they are.
 
 enum LeadStage {
   NEW
@@ -263,19 +268,19 @@ enum LeadStage {
 }
 
 
-
 model Invoice {
-  id             String         @id @default(cuid())
-  clientId       String
-  client         CurrentClient  @relation(fields: [clientId], references: [id])
-  amount         Float
-  currency       String         // e.g. USD, EUR, INR
-  status         InvoiceStatus  @default(PENDING)
-  issueDate      DateTime       @default(now())
-  dueDate        DateTime
-  description    String?
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @default(now()) @updatedAt
+  id          String          @id @default(cuid())
+  clientId    String
+  client      CurrentClient   @relation(fields: [clientId], references: [id])
+  // MODIFIED: Changed Decimal to String to maintain financial precision
+  amount      String 
+  currency    String          // e.g. USD, EUR, INR
+  status      InvoiceStatus   @default(PENDING)
+  issueDate   DateTime        @default(now())
+  dueDate     DateTime
+  description String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
 }
 
 enum InvoiceStatus {
@@ -286,39 +291,40 @@ enum InvoiceStatus {
 }
 
 model Expense {
-  id             String        @id @default(cuid())
-  clientId       String?       // Optional if expense is linked to a client
-  client         CurrentClient? @relation(fields: [clientId], references: [id])
-  title          String
-  amount         Float
-  currency       String        // e.g. INR, USD
-  category       String?       // e.g. Hosting, Contractor Payment
-  date           DateTime      @default(now())
-  notes          String?
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @default(now()) @updatedAt
+  id          String           @id @default(cuid())
+  clientId    String?          // Optional if expense is linked to a client
+  client      CurrentClient?   @relation(fields: [clientId], references: [id])
+  title       String
+  // MODIFIED: Changed Decimal to String to maintain financial precision
+  amount      String
+  currency    String           // e.g. INR, USD
+  category    String?          // e.g. Hosting, Contractor Payment
+  date        DateTime         @default(now())
+  notes       String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
 }
 
 model KnowledgeHub {
-  id          String    @id @default(cuid())
+  id          String   @id @default(cuid())
   title       String
   description String
-  type        String    // e.g. "Onboarding", "Code Snippets", "Best Practices"
-  content     String    // Markdown
-  tags        Json      // e.g. ["Onboarding", "Code Snippets"]
-  url         String?   // Optional link to external resources
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @default(now()) @updatedAt
+  type        String   // e.g. "Onboarding", "Code Snippets", "Best Practices"
+  content     String   // Markdown
+  tags        String?  // MODIFIED: Changed String[] to String, store as JSON string
+  url         String?  // Optional link to external resources
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model TemplateLibrary {
-  id          String    @id @default(cuid())
-  name        String    // e.g. "Proposal Template v1"
+  id          String       @id @default(cuid())
+  name        String       // e.g. "Proposal Template v1"
   type        TemplateType
-  content     String    // Markdown/HTML/JSON
-  variables   Json      // e.g. ["clientName", "projectScope"] for placeholders
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @default(now()) @updatedAt
+  content     String       // Markdown/HTML/JSON
+  variables   String?      // MODIFIED: Changed String[] to String, store as JSON string for placeholders
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 }
 
 enum TemplateType {
@@ -328,9 +334,6 @@ enum TemplateType {
   CONTRACT
   OTHER
 }
-
-
-// prisma/schema.prisma
 
 model PricingCategory {
   id        Int           @id @default(autoincrement())
@@ -352,55 +355,54 @@ model PricingPlan {
   category               PricingCategory  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   categoryId             Int
   
-  features               Json
+  features               String
 
-  featuresNotIncluded    Json
+  featuresNotIncluded    String?
 
   createdAt              DateTime         @default(now())
   updatedAt              DateTime         @default(now()) @updatedAt
 }
 
-
 // --- PORTFOLIO MODELS ---
 
 model PortfolioItem {
-  id               Int      @id @default(autoincrement())
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @default(now()) @updatedAt
+  id                 Int               @id @default(autoincrement())
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
 
   // Identity
-  companyName      String
-  companyLogo      String
-  industry         String
-  location         String
-  website          String
+  companyName        String
+  companyLogo        String
+  industry           String
+  location           String
+  website            String
 
   // Hero
-  heroLine         String?
-  heroImage        String
-  
+  heroLine           String?
+  heroImage          String
+
   // Content
-  description      String   
-  projectDuration  String
-  problemStatement String   
-  solution         String   
-  results          String   
+  description        String // Removed @db.Text as SQLite handles large text fine as String
+  projectDuration    String
+  problemStatement   String // Removed @db.Text
+  solution           String // Removed @db.Text
+  results            String // Removed @db.Text
 
   // Arrays
-  services         Json 
-  media            Json 
+  services           String? // MODIFIED: Changed String[] to String, store as JSON string
+  media              String? // MODIFIED: Changed String[] to String, store as JSON string
 
   // Relations (1-to-1)
-  testimonial      Testimonial?
-  stats            PortfolioStats?
+  testimonial        Testimonial?
+  stats              PortfolioStats?
 }
 
 model Testimonial {
   id              Int           @id @default(autoincrement())
-  quote           String       
+  quote           String        // Removed @db.Text
   author          String
   designation     String
-  
+
   // Relation
   portfolioItem   PortfolioItem @relation(fields: [portfolioItemId], references: [id], onDelete: Cascade)
   portfolioItemId Int           @unique

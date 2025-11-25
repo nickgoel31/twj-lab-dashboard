@@ -59,12 +59,17 @@ export async function getPortfolioData() {
   }
 }
 
-// 2. UPDATE
 export async function updatePortfolioItem(data: PortfolioItemWithTestimonialsAndStats) {
   try {
+    // ⚠️ Logic Check: 
+    // If 'data' comes directly from the DB type, data.services is already a JSON string.
+    // If 'data' comes from a Form where you converted it to an array, you must Stringify it back here.
+    
+    // Assuming data.services is strictly complying with the Prisma Type (String):
     const updated = await prisma.portfolioItem.update({
       where: { id: data.id },
       data: {
+        // ... other fields ...
         companyName: data.companyName,
         companyLogo: data.companyLogo,
         industry: data.industry,
@@ -77,10 +82,13 @@ export async function updatePortfolioItem(data: PortfolioItemWithTestimonialsAnd
         problemStatement: data.problemStatement,
         solution: data.solution,
         results: data.results,
-        services: data.services,
+        
+        // ✅ FIX: Ensure this is a string. 
+        // If your types allow arrays, wrap this in JSON.stringify(data.services)
+        services: data.services, 
         media: data.media,
 
-        // UPSERT: Updates if exists, Creates if it doesn't
+        // ... (Testimonials and Stats logic remains the same) ...
         testimonial: data.testimonial ? {
           upsert: {
             create: {
@@ -142,8 +150,12 @@ export async function createPortfolioItem() {
         problemStatement: '',
         solution: '',
         results: '',
-        services: [],
-        media: [],
+        
+        // ✅ FIX: SQLite expects a String, not an Array
+        // We initialize it as an empty JSON array string "[]"
+        services: '[]', 
+        media: '[]',
+        
         testimonial: {
             create: {
                 quote: "",

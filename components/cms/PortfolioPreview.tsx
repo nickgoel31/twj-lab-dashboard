@@ -2,6 +2,7 @@ import React from 'react';
 import { ArrowUpRight, Globe, MapPin, Quote } from 'lucide-react';
 import { PortfolioItemWithTestimonialsAndStats } from '@/actions/portfolio';
 import Image from 'next/image';
+import { safeParse } from './PortfolioEditor';
 
 interface PortfolioPreviewProps {
   workData: PortfolioItemWithTestimonialsAndStats[];
@@ -16,6 +17,9 @@ const PortfolioPreview = ({ workData }: PortfolioPreviewProps) => {
   const project = workData[0]; // Defaulting to first for preview simplicity if ID isn't passed
 
   if (!project) return <div className="p-10 text-center text-slate-400">No project data found.</div>;
+
+  const servicesList = safeParse(project.services as string);
+    const mediaList = safeParse(project.media as string);
 
   return (
     <div className="bg-white rounded-2xl shadow-2xl overflow-hidden border border-slate-200 h-full flex flex-col font-sans">
@@ -68,7 +72,7 @@ const PortfolioPreview = ({ workData }: PortfolioPreviewProps) => {
                 <div className="col-span-2">
                     <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Services</div>
                     <div className="flex flex-wrap gap-2">
-                        {project.services.map((s, i) => (
+                        {servicesList.map((s, i) => (
                             <span key={i} className="px-2 py-1 bg-slate-100 text-slate-600 text-[10px] uppercase font-bold rounded-sm border border-slate-200">
                                 {s}
                             </span>
@@ -127,7 +131,7 @@ const PortfolioPreview = ({ workData }: PortfolioPreviewProps) => {
             {/* MEDIA GALLERY */}
             {project.media && project.media.length > 0 && (
                 <div className="grid grid-cols-2 gap-2">
-                    {project.media.map((img, idx) => (
+                    {mediaList.map((img, idx) => (
                         <div key={idx} className={`rounded-lg overflow-hidden border border-slate-100 ${idx === 0 ? 'col-span-2 aspect-video' : 'aspect-square'}`}>
                             {/* Placeholder check for demo */}
                             <Image src={img} alt="work" width={1000} height={1000} className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />

@@ -8,8 +8,8 @@ export type PlanType = {
   description: string;
   featured: boolean;
   price: string;
-  features: string[];
-  featuresNotIncluded?: string[];
+  features: string;
+  featuresNotIncluded?: string;
   everythingIncludedPrev?: boolean;
 };
 
@@ -24,7 +24,7 @@ export type OurWorkType = {
     companyLogo: string;
     companyName: string;
     description: string;
-    services: string[];
+    services: string;
     heroImage: string;
     industry: string;
     location: string;
@@ -38,7 +38,7 @@ export type OurWorkType = {
         author: string;
         designation: string;
     };
-    media?: string[];
+    media?: string;
     data?: {
         conversionRateIncrease?: string;
         trafficGrowth?: string;
