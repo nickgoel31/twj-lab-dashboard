@@ -17,13 +17,42 @@ export type PortfolioItemWithTestimonialsAndStats = Prisma.PortfolioItemGetPaylo
 export async function getPortfolioData() {
   try {
     const data = await prisma.portfolioItem.findMany({
-      include: {
-        testimonial: true,
-        stats: true
+      // USE SELECT INSTEAD OF INCLUDE TO PICK ONLY WHAT YOU NEED
+      select: {
+        id: true,
+        companyName: true,
+        companyLogo: true,
+        industry: true,
+        location: true,
+        website: true,
+        heroLine: true,
+        heroImage: true,
+        description: true,
+        projectDuration: true,
+        problemStatement: true,
+        solution: true,
+        results: true,
+        services: true,
+        media: false,
+        // For relations, also select only what you need
+        testimonial: {
+          select: {
+            author: true,
+            quote: true,
+            designation: true
+          }
+        },
+        stats: {
+          select: {
+            conversionRateIncrease: true,
+            trafficGrowth: true,
+            userGrowth: true
+          }
+        }
       },
       orderBy: { id: 'asc' }
     })
-    return data as PortfolioItemWithTestimonialsAndStats[]
+    return data
   } catch (error) {
     console.error('Failed to fetch portfolio:', error)
     return []
