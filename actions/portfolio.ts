@@ -14,12 +14,13 @@ export type PortfolioItemWithTestimonialsAndStats = Prisma.PortfolioItemGetPaylo
 }>
 
 // 1. GET ALL
-export async function getPortfolioData() {
+export async function getPortfolioData(): Promise<PortfolioItemWithTestimonialsAndStats[]> {
   try {
     const data = await prisma.portfolioItem.findMany({
-      // USE SELECT INSTEAD OF INCLUDE TO PICK ONLY WHAT YOU NEED
       select: {
         id: true,
+        createdAt: true,        // <- add this
+        updatedAt: true,        // <- and this
         companyName: true,
         companyLogo: true,
         industry: true,
@@ -33,24 +34,27 @@ export async function getPortfolioData() {
         solution: true,
         results: true,
         services: true,
-        media: false,
-        // For relations, also select only what you need
+        media: true,            // <- add this
         testimonial: {
           select: {
+            id: true,
+            portfolioItemId: true,
             author: true,
             quote: true,
-            designation: true
-          }
+            designation: true,
+          },
         },
         stats: {
           select: {
+            id: true,
+            portfolioItemId: true,
             conversionRateIncrease: true,
             trafficGrowth: true,
-            userGrowth: true
-          }
-        }
+            userGrowth: true,
+          },
+        },
       },
-      orderBy: { id: 'asc' }
+      orderBy: { id: 'asc' },
     })
     return data
   } catch (error) {
