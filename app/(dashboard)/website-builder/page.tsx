@@ -60,7 +60,7 @@ const WebsiteBuilder = () => {
     <div className="flex h-screen bg-slate-50 text-slate-800 font-sans overflow-hidden">
       
       {/* Fixed width sidebar */}
-      <div className="w-64 shrink-0">
+      <div className="md:w-64 shrink-0">
         <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
       </div>
 
@@ -102,7 +102,7 @@ const WebsiteBuilder = () => {
             </div>
 
             {/* --- RIGHT COLUMN: PREVIEW --- */}
-            <div className="h-full overflow-y-auto pl-2">
+            <div className="h-full overflow-y-auto pl-2 hidden md:block">
                 {activeTab === 'pricing' ? (
     <PricingPreview pricingData={pricingData} />
 ) : activeTab === 'portfolio' ? (
