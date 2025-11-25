@@ -1,10 +1,10 @@
 // components/cms/PricingPreview.tsx
 import React, { useState } from 'react';
-import { PricingPlanType } from './types';
 import { Check, X, Sparkles } from 'lucide-react';
+import { PricingCategoryWithPlans } from '@/actions/pricing';
 
 interface PricingPreviewProps {
-  pricingData: PricingPlanType[];
+  pricingData: PricingCategoryWithPlans[];
 }
 
 // ✅ 1. Helper function to parse JSON strings safely
