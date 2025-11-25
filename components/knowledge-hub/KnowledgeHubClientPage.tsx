@@ -4,11 +4,21 @@
 
 import React, { useState, useMemo, useEffect, useTransition} from 'react';
 import { createResource, deleteResource } from '@/actions/knowledgeHubActions';
-
 import { KnowledgeHub } from '@/lib/generated/prisma'
 
 // --- TYPESCRIPT INTERFACE ---
 type ResourceType = 'SOP' | 'Email Template' | 'Code Snippet' | 'Design Resource';
+
+// ✅ HELPER: Safely parse JSON string to Array
+const safeParse = (data: string | null | undefined): string[] => {
+  if (!data) return [];
+  try {
+    const parsed = JSON.parse(data);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (e) {
+    return [];
+  }
+};
 
 // --- SVG ICONS ---
 const SearchIcon = ({ className = "w-6 h-6" }) => (<svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>);
@@ -38,11 +48,15 @@ const AddResourceModal: React.FC<{ isOpen: boolean; onClose: () => void; }> = ({
     const [type, setType] = useState<ResourceType>('SOP');
     
     const handleSubmit = (formData: FormData) => {
+        // ✅ FIX 1: Create the array, then Stringify it for the DB
+        const tagsArray = (formData.get('tags') as string).split(',').map(tag => tag.trim()).filter(Boolean);
+
         const data = {
             title: formData.get('title') as string,
             description: formData.get('description') as string,
             type: formData.get('type') as string,
-            tags: (formData.get('tags') as string).split(',').map(tag => tag.trim()).filter(Boolean),
+            // Store as JSON string
+            tags: JSON.stringify(tagsArray),
             content: formData.get('content') as string,
             url: formData.get('type') === 'Design Resource' ? formData.get('url') as string : null,
         };
@@ -239,11 +253,16 @@ export default function KnowledgeHubClientPage({ initialResources }: { initialRe
         }
         if (searchTerm) {
             const lowercasedTerm = searchTerm.toLowerCase();
-            items = items.filter(r =>
-                r.title.toLowerCase().includes(lowercasedTerm) ||
-                r.description.toLowerCase().includes(lowercasedTerm) ||
-                r.tags.some(tag => tag.toLowerCase().includes(lowercasedTerm))
-            );
+            items = items.filter(r => {
+                // ✅ FIX 2: Parse the DB string to array before checking
+                const tagsList = safeParse(r.tags);
+                
+                return (
+                    r.title.toLowerCase().includes(lowercasedTerm) ||
+                    r.description.toLowerCase().includes(lowercasedTerm) ||
+                    tagsList.some(tag => tag.toLowerCase().includes(lowercasedTerm))
+                );
+            });
         }
         return items;
     }, [searchTerm, selectedCategory, resources]);
