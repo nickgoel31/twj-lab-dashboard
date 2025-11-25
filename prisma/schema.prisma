@@ -1,8 +1,4 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// prisma/schema.prisma
 
 generator client {
   provider = "prisma-client-js"
@@ -10,34 +6,34 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
 }
 
 model CurrentClient {
-  id             String                 @id @default(cuid())
-  name           String
-  companyName    String?
-  email          String                 @unique
-  phone          String?
-  dealValue    Float?
-  currency       String?                // e.g. USD, EUR, INR
-  country        String?
-  services       String[]               // e.g. ["Web Development", "Branding"]
-  status         ClientStatus           @default(ACTIVE)
-  startDate      DateTime               @default(now())
-  paymentTerms   PaymentTerms           @default(FIFTY_FIFTY)
-  notes          String?
+  id              String                 @id @default(cuid())
+  name            String
+  companyName     String?
+  email           String                 @unique
+  phone           String?
+  dealValue       Float?
+  currency        String?                // e.g. USD, EUR, INR
+  country         String?
+  services        Json                   // e.g. ["Web Development", "Branding"]
+  status          ClientStatus           @default(ACTIVE)
+  startDate       DateTime               @default(now())
+  paymentTerms    PaymentTerms           @default(FIFTY_FIFTY)
+  notes           String?
 
   // 🔗 Relations
-  projects       Project[]
-  invoices       Invoice[]
-  expenses       Expense[]
+  projects        Project[]
+  invoices        Invoice[]
+  expenses        Expense[]
   interactionLogs InteractionLog[]
-  followUps      FollowUpSuggestion[]
-  documents      DocumentVault[]
+  followUps       FollowUpSuggestion[]
+  documents       DocumentVault[]
 
-  createdAt      DateTime               @default(now())
-  updatedAt      DateTime               @updatedAt
+  createdAt       DateTime               @default(now())
+  updatedAt       DateTime               @updatedAt
 }
 
 model Project {
@@ -52,7 +48,7 @@ model Project {
   startDate        DateTime?      // planned or actual
   dueDate          DateTime?      // expected completion
   budget           Float?         // optional budget estimate
-  techStack        String[]       // e.g. ["Next.js", "Tailwind", "Node.js"]
+  techStack        Json           // e.g. ["Next.js", "Tailwind", "Node.js"]
   devNotes         String?        // internal notes for development
   tasks            Task[]         // detailed breakdown
   milestones       Milestone[]    // key checkpoints
@@ -74,7 +70,7 @@ model Task {
   assignee    String?       // contractor name or ID
   dueDate     DateTime?
   createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  updatedAt   DateTime      @default(now()) @updatedAt
 }
 
 model Milestone {
@@ -212,7 +208,7 @@ model Lead {
   id              Int      @id @default(autoincrement())
   name            String
   email           String
-  company    String // Changed from 'company' to match your dashboard code
+  company         String
   industry        String
   country         String
   dealValue       Int
@@ -227,7 +223,7 @@ model Lead {
   interactionLogs InteractionLogLead[] // <-- Each Lead can have multiple interaction logs
 
   createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  updatedAt       DateTime @default(now()) @updatedAt
 }
 
 model Note {
@@ -272,14 +268,14 @@ model Invoice {
   id             String         @id @default(cuid())
   clientId       String
   client         CurrentClient  @relation(fields: [clientId], references: [id])
-  amount         Decimal        @db.Decimal(10,2)
+  amount         Float
   currency       String         // e.g. USD, EUR, INR
   status         InvoiceStatus  @default(PENDING)
   issueDate      DateTime       @default(now())
   dueDate        DateTime
   description    String?
   createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
+  updatedAt      DateTime       @default(now()) @updatedAt
 }
 
 enum InvoiceStatus {
@@ -294,25 +290,25 @@ model Expense {
   clientId       String?       // Optional if expense is linked to a client
   client         CurrentClient? @relation(fields: [clientId], references: [id])
   title          String
-  amount         Decimal       @db.Decimal(10,2)
+  amount         Float
   currency       String        // e.g. INR, USD
   category       String?       // e.g. Hosting, Contractor Payment
   date           DateTime      @default(now())
   notes          String?
   createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
+  updatedAt      DateTime      @default(now()) @updatedAt
 }
 
 model KnowledgeHub {
   id          String    @id @default(cuid())
   title       String
   description String
-  type       String    // e.g. "Onboarding", "Code Snippets", "Best Practices"
+  type        String    // e.g. "Onboarding", "Code Snippets", "Best Practices"
   content     String    // Markdown
-  tags        String[]  // e.g. ["Onboarding", "Code Snippets"]
-  url        String?   // Optional link to external resources
+  tags        Json      // e.g. ["Onboarding", "Code Snippets"]
+  url         String?   // Optional link to external resources
   createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  updatedAt   DateTime  @default(now()) @updatedAt
 }
 
 model TemplateLibrary {
@@ -320,9 +316,9 @@ model TemplateLibrary {
   name        String    // e.g. "Proposal Template v1"
   type        TemplateType
   content     String    // Markdown/HTML/JSON
-  variables   String[]  // e.g. ["clientName", "projectScope"] for placeholders
+  variables   Json      // e.g. ["clientName", "projectScope"] for placeholders
   createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  updatedAt   DateTime  @default(now()) @updatedAt
 }
 
 enum TemplateType {
@@ -334,8 +330,6 @@ enum TemplateType {
 }
 
 
-
-
 // prisma/schema.prisma
 
 model PricingCategory {
@@ -343,7 +337,7 @@ model PricingCategory {
   title     String
   plans     PricingPlan[]
   createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
+  updatedAt DateTime      @default(now()) @updatedAt
 }
 
 model PricingPlan {
@@ -358,12 +352,12 @@ model PricingPlan {
   category               PricingCategory  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   categoryId             Int
   
-  features               String[]
+  features               Json
 
-  featuresNotIncluded    String[]
+  featuresNotIncluded    Json
 
   createdAt              DateTime         @default(now())
-  updatedAt              DateTime         @updatedAt
+  updatedAt              DateTime         @default(now()) @updatedAt
 }
 
 
@@ -372,7 +366,7 @@ model PricingPlan {
 model PortfolioItem {
   id               Int      @id @default(autoincrement())
   createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  updatedAt        DateTime @default(now()) @updatedAt
 
   // Identity
   companyName      String
@@ -386,15 +380,15 @@ model PortfolioItem {
   heroImage        String
   
   // Content
-  description      String   @db.Text
+  description      String   
   projectDuration  String
-  problemStatement String   @db.Text
-  solution         String   @db.Text
-  results          String   @db.Text
+  problemStatement String   
+  solution         String   
+  results          String   
 
   // Arrays
-  services         String[] 
-  media            String[] 
+  services         Json 
+  media            Json 
 
   // Relations (1-to-1)
   testimonial      Testimonial?
@@ -403,7 +397,7 @@ model PortfolioItem {
 
 model Testimonial {
   id              Int           @id @default(autoincrement())
-  quote           String        @db.Text
+  quote           String       
   author          String
   designation     String
   
