@@ -5,6 +5,7 @@
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { Lead, Note, InteractionLogLead, InteractionType } from '@/lib/generated/prisma';
+import { parseDealValue } from '@/helpers/miscelleneous';
 
 // 1. UPDATED TYPE: Now includes both notes and interaction logs for full type safety
 export type LeadWithDetails = Lead & { 
@@ -54,14 +55,17 @@ export async function createLead(data: LeadFormData) {
       .split('\n')
       .filter((note) => note.trim() !== '');
 
+      const parsedDealValue = parseDealValue(data.dealValue);
+
     const lead = await prisma.lead.create({
       data: {
+        id: Math.floor(Math.random() * 1000000), // Simple random ID for demo; replace with your own logic
         name: data.name,
         email: data.email,
         company: data.companyName, // <-- CORRECTED field name
         industry: data.industry,
         country: data.country,
-        dealValue: parseInt(data.dealValue, 10) || 0,
+        dealValue: parsedDealValue || 0,
         currency: data.currency,
         projectSummary: data.projectSummary,
         leadStage: 'NEW',
